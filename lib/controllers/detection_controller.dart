@@ -90,8 +90,13 @@ class DetectionController extends ChangeNotifier {
   InferenceResult? get latestResult =>
       _resultsHistory.isNotEmpty ? _resultsHistory.last : null;
 
-  /// Check if fall is detected based on current threshold (for UI display only)
-  bool get isFallDetected {
+  /// Whether a fall has been CONFIRMED (after all post-processing checks)
+  /// This should be used by the UI
+  bool get isFallConfirmed => _isFallConfirmed;
+  bool _isFallConfirmed = false;
+
+  /// Raw model probability above threshold (for display purposes only)
+  bool get isModelPredictingFall {
     final result = latestResult;
     if (result == null) return false;
     return result.fallProbability > _settings.fallThreshold;
@@ -202,6 +207,7 @@ class DetectionController extends ChangeNotifier {
     _maxFallProb = 0;
     _lastActivity = null;
     _bufferFilledLogged = false;
+    _isFallConfirmed = false;
     // Reset advanced detection state
     _fallCounter = 0;
     _lastFallTime = null;
@@ -213,8 +219,11 @@ class DetectionController extends ChangeNotifier {
     _frameCount++;
     _framesSinceLastInference++;
 
-    // Calculate acceleration magnitude for impact gate
-    _lastAccMagnitude = data.accMagnitude;
+    // Track max acceleration magnitude within the buffer window for impact gate
+    final currentMag = data.accMagnitude;
+    if (currentMag > _lastAccMagnitude) {
+      _lastAccMagnitude = currentMag;
+    }
 
     // Add to history (for charts)
     _sensorHistory.add(data);
@@ -222,7 +231,7 @@ class DetectionController extends ChangeNotifier {
       _sensorHistory.removeFirst();
     }
 
-    // Add to buffer (for inference)
+    // Add to buffer (for inference)s
     _buffer.add(data);
     if (_buffer.length > _settings.windowSize) {
       _buffer.removeAt(0);
@@ -346,11 +355,18 @@ class DetectionController extends ChangeNotifier {
     _fallsDetected++;
     _lastFallTime = DateTime.now();
     _fallCounter = 0; // Reset after trigger
+    _isFallConfirmed = true; // Set confirmed flag for UI
 
     debugPrint(
       "🚨🚨🚨 [CONTROLLER] FALL CONFIRMED! prob=${result.fallProbability.toStringAsFixed(3)}, "
       "activity=${result.activityName}, cooldown=${_settings.cooldownSeconds}s 🚨🚨🚨",
     );
+
+    // Auto-reset confirmed flag after 5 seconds (for UI display)
+    Future.delayed(const Duration(seconds: 5), () {
+      _isFallConfirmed = false;
+      notifyListeners();
+    });
 
     // Add fall event to session
     if (_currentSession != null) {

@@ -6,27 +6,26 @@ class DetectionSettings {
   final int chartHistorySize;
   final bool showDebugLogs;
 
-  // Advanced fall detection settings (NEW)
-  final double
-  confirmationThreshold; // Probability threshold for confirmation (0.8)
-  final int confirmationFrames; // Required consecutive frames (3)
-  final int cooldownSeconds; // Cooldown after fall detection (30s)
-  final int inferenceSkipFrames; // Run inference every N frames (5)
+  // Advanced fall detection settings
+  final double confirmationThreshold; // Probability threshold for confirmation
+  final int confirmationFrames; // Required consecutive inferences
+  final int cooldownSeconds; // Cooldown after fall detection
+  final int inferenceSkipFrames; // Run inference every N frames
   final bool enableImpactGate; // Require impact before detection
-  final double impactThreshold; // Acceleration magnitude threshold (15.0)
+  final double impactThreshold; // Acceleration magnitude threshold
 
   const DetectionSettings({
     this.fallThreshold = 0.5,
     this.windowSize = 200,
     this.chartHistorySize = 100,
     this.showDebugLogs = false,
-    // Advanced defaults
+    // Advanced defaults - conservative to reduce false positives
     this.confirmationThreshold = 0.8,
-    this.confirmationFrames = 3,
+    this.confirmationFrames = 5, // Increased from 3 to 5
     this.cooldownSeconds = 30,
     this.inferenceSkipFrames = 5,
     this.enableImpactGate = true,
-    this.impactThreshold = 15.0,
+    this.impactThreshold = 20.0, // Increased from 15 to 20 m/s²
   });
 
   DetectionSettings copyWith({

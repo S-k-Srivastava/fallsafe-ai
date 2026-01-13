@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 
-/// Reusable stat card widget
+/// Reusable stat card widget - theme-aware
 class StatCard extends StatelessWidget {
   final String label;
   final String value;
@@ -21,12 +20,15 @@ class StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       padding: EdgeInsets.all(compact ? AppSpacing.sm : AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.surfaceBorder),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,7 +40,7 @@ class StatCard extends StatelessWidget {
                 Icon(
                   icon,
                   size: compact ? AppSpacing.iconSm : AppSpacing.iconMd,
-                  color: AppColors.textMuted,
+                  color: theme.hintColor,
                 ),
                 SizedBox(width: compact ? AppSpacing.xs : AppSpacing.sm),
               ],
@@ -48,7 +50,7 @@ class StatCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: compact ? 10 : 12,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.textMuted,
+                    color: theme.hintColor,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -61,7 +63,7 @@ class StatCard extends StatelessWidget {
             style: TextStyle(
               fontSize: compact ? 16 : 20,
               fontWeight: FontWeight.w700,
-              color: valueColor ?? AppColors.textPrimary,
+              color: valueColor ?? colorScheme.onSurface,
             ),
           ),
         ],
@@ -70,7 +72,7 @@ class StatCard extends StatelessWidget {
   }
 }
 
-/// Horizontal stat display for compact layout
+/// Horizontal stat display for compact layout - theme-aware
 class StatRow extends StatelessWidget {
   final List<StatItem> items;
 
@@ -78,21 +80,26 @@ class StatRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.surfaceBorder),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: items.map((item) => _buildItem(item)).toList(),
+        children: items.map((item) => _buildItem(context, item)).toList(),
       ),
     );
   }
 
-  Widget _buildItem(StatItem item) {
+  Widget _buildItem(BuildContext context, StatItem item) {
+    final theme = Theme.of(context);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -101,16 +108,16 @@ class StatRow extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: item.valueColor ?? AppColors.textPrimary,
+            color: item.valueColor ?? theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
           item.label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w500,
-            color: AppColors.textMuted,
+            color: theme.hintColor,
           ),
         ),
       ],

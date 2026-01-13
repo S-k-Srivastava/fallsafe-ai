@@ -11,21 +11,23 @@ class HistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Session History'),
-        backgroundColor: AppColors.background,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         actions: [
           PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, color: AppColors.textSecondary),
+            icon: Icon(Icons.more_vert, color: theme.hintColor),
             onSelected: (value) async {
               if (value == 'clear') {
                 final confirm = await showDialog<bool>(
                   context: context,
                   builder: (ctx) => AlertDialog(
-                    backgroundColor: AppColors.surface,
+                    backgroundColor: theme.colorScheme.surface,
                     title: const Text('Clear All Sessions?'),
                     content: const Text('This action cannot be undone.'),
                     actions: [
@@ -295,7 +297,10 @@ class _StatChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isAlert ? AppColors.danger : AppColors.textMuted;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final color = isAlert ? AppColors.danger : theme.hintColor;
+    final bgColor = isDark ? AppColors.surfaceLight : const Color(0xFFF0F0F0);
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -303,7 +308,7 @@ class _StatChip extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
+        color: bgColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
       ),
       child: Row(

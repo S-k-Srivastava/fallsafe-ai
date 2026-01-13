@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
+import '../core/theme/theme_controller.dart';
 import '../controllers/detection_controller.dart';
 import '../models/detection_settings.dart';
 import '../services/permission_service.dart';
@@ -8,7 +9,6 @@ import '../widgets/status_indicator.dart';
 import '../widgets/control_button.dart';
 import '../widgets/sensor_chart.dart';
 import '../widgets/stat_card.dart';
-import '../widgets/activity_display.dart';
 import '../widgets/settings_panel.dart';
 import 'history_screen.dart';
 
@@ -114,54 +114,71 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('FallSafe'),
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
+        centerTitle: false,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Tech logo style
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.primary, AppColors.primaryLight],
+                ),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: const Text(
+                'F',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  letterSpacing: -1,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'FallSafe',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: isDarkMode
+                    ? AppColors.textPrimary
+                    : const Color(0xFF1A1A1A),
+                letterSpacing: -0.5,
+              ),
+            ),
+          ],
+        ),
         actions: [
           // History button
           IconButton(
             icon: const Icon(Icons.history_rounded),
-            color: AppColors.textSecondary,
+            color: isDarkMode
+                ? AppColors.textSecondary
+                : const Color(0xFF666666),
             onPressed: _openHistory,
             tooltip: 'Session History',
           ),
-          if (_controller.isRunning)
-            Container(
-              margin: const EdgeInsets.only(right: AppSpacing.md),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: AppSpacing.xs,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.safe.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: AppColors.safe,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  const Text(
-                    'LIVE',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.safe,
-                    ),
-                  ),
-                ],
-              ),
+          // Theme toggle
+          IconButton(
+            icon: Icon(
+              isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
             ),
+            color: isDarkMode
+                ? AppColors.textSecondary
+                : const Color(0xFF666666),
+            onPressed: () => ThemeController.of(context)?.toggleTheme(),
+            tooltip: isDarkMode ? 'Light Mode' : 'Dark Mode',
+          ),
         ],
       ),
       body: SafeArea(
@@ -232,12 +249,17 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Status indicator at top
+          // Status indicator at top with activity
           StatusIndicator(
-            isFallDetected: _controller.isFallDetected,
+            isFallDetected: _controller.isFallConfirmed,
             fallProbability: _controller.latestResult?.fallProbability ?? 0,
             isRunning: _controller.isRunning,
             isInitialized: _controller.isInitialized,
+            activityName: _controller.latestResult?.activityName,
+            activityEmoji: _controller.latestResult?.activityEmoji,
+            maxMagnitude: _controller.isRunning
+                ? _controller.lastAccMagnitude
+                : null,
           ),
           const SizedBox(height: AppSpacing.md),
 
@@ -292,10 +314,6 @@ class _HomeScreenState extends State<HomeScreen> {
             data: _controller.sensorHistory,
             type: SensorChartType.gyroscope,
           ),
-          const SizedBox(height: AppSpacing.md),
-
-          // Activity display
-          ActivityDisplay(result: _controller.latestResult),
           const SizedBox(height: AppSpacing.lg),
         ],
       ),
@@ -389,7 +407,7 @@ class _SensorValueColumn extends StatelessWidget {
           _ValueRow('Y', y, AppColors.chartY),
           _ValueRow('Z', z, AppColors.chartZ),
           const Divider(height: AppSpacing.md),
-          _ValueRow('Mag', magnitude, AppColors.chartMagnitude),
+          _ValueRow('Magnitude', magnitude, AppColors.chartMagnitude),
         ],
       ),
     );

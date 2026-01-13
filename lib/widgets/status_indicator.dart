@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 
-/// Large status indicator showing current detection state
+/// Large status indicator showing current detection state and activity
 class StatusIndicator extends StatelessWidget {
   final bool isFallDetected;
   final double fallProbability;
   final bool isRunning;
   final bool isInitialized;
+  final String? activityName;
+  final String? activityEmoji;
+  final double? maxMagnitude;
 
   const StatusIndicator({
     super.key,
@@ -15,6 +18,9 @@ class StatusIndicator extends StatelessWidget {
     required this.fallProbability,
     required this.isRunning,
     required this.isInitialized,
+    this.activityName,
+    this.activityEmoji,
+    this.maxMagnitude,
   });
 
   @override
@@ -34,7 +40,7 @@ class StatusIndicator extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
-            color: _getStatusColor().withOpacity(0.3),
+            color: _getStatusColor().withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -43,33 +49,59 @@ class StatusIndicator extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            child: Icon(
-              _getIcon(),
-              key: ValueKey(isFallDetected),
-              size: 48,
-              color: Colors.white,
-            ),
+          // Status row with icon and text
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: Icon(
+                  _getIcon(),
+                  key: ValueKey(isFallDetected),
+                  size: 40,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Text(
+                _getStatusText(),
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: AppSpacing.md),
-          Text(
-            _getStatusText(),
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
+          // Activity, probability, and magnitude row
           if (isRunning) ...[
-            Text(
-              'Fall Probability: ${(fallProbability * 100).toStringAsFixed(1)}%',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.white.withOpacity(0.9),
-              ),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: AppSpacing.md,
+              runSpacing: AppSpacing.sm,
+              children: [
+                // Activity display
+                if (activityName != null)
+                  _buildInfoChip(
+                    icon: activityEmoji ?? '🏃',
+                    label: activityName!,
+                    isEmoji: true,
+                  ),
+                // Fall probability
+                _buildInfoChip(
+                  icon: '📊',
+                  label: 'Fall: ${(fallProbability * 100).toStringAsFixed(1)}%',
+                  isEmoji: true,
+                ),
+                // Max magnitude
+                if (maxMagnitude != null)
+                  _buildInfoChip(
+                    icon: '⚡',
+                    label: 'Max: ${maxMagnitude!.toStringAsFixed(1)} m/s²',
+                    isEmoji: true,
+                  ),
+              ],
             ),
           ] else ...[
             Text(
@@ -77,10 +109,45 @@ class StatusIndicator extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoChip({
+    required String icon,
+    required String label,
+    bool isEmoji = false,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isEmoji)
+            Text(icon, style: const TextStyle(fontSize: 14))
+          else
+            Icon(Icons.speed, size: 14, color: Colors.white),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
         ],
       ),
     );
@@ -94,9 +161,9 @@ class StatusIndicator extends StatelessWidget {
       return [AppColors.primary, AppColors.primaryDark];
     }
     if (isFallDetected) {
-      return [AppColors.danger, AppColors.danger.withOpacity(0.8)];
+      return [AppColors.danger, AppColors.danger.withValues(alpha: 0.8)];
     }
-    return [AppColors.safe, AppColors.safe.withOpacity(0.8)];
+    return [AppColors.safe, AppColors.safe.withValues(alpha: 0.8)];
   }
 
   Color _getStatusColor() {

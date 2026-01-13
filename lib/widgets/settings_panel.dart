@@ -261,19 +261,6 @@ class _SettingsPanelState extends State<SettingsPanel> {
               },
             ),
           ],
-          const Divider(height: AppSpacing.lg, color: AppColors.surfaceBorder),
-
-          // === DEBUG ===
-          _buildSwitchSetting(
-            label: 'Debug Logs',
-            value: _showDebugLogs,
-            description: 'Show detailed logs in console',
-            isDisabled: isDisabled,
-            onChanged: (v) {
-              setState(() => _showDebugLogs = v);
-              _updateSettings();
-            },
-          ),
         ],
       ),
     );

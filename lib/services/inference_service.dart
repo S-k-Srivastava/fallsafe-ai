@@ -91,7 +91,13 @@ class InferenceService {
         timestamp: DateTime.now(),
       );
 
-      debugPrint("🔮 [INFERENCE_SERVICE] Result: $result");
+      // Debug: show all activity probabilities
+      debugPrint(
+        "🔮 [INFERENCE] Fall prob: ${fallProb.toStringAsFixed(3)}, Activity: $activityClass (${result.activityName})",
+      );
+      debugPrint(
+        "📊 [INFERENCE] All probs: ${activityProbs.map((p) => p.toStringAsFixed(2)).toList()}",
+      );
 
       if (result.isFallDetected) {
         debugPrint("🚨🚨🚨 [INFERENCE_SERVICE] FALL DETECTED! 🚨🚨🚨");
