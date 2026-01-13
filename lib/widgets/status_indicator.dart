@@ -35,12 +35,12 @@ class StatusIndicator extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: _getGradientColors(),
+          colors: _getGradientColors(context),
         ),
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
-            color: _getStatusColor().withValues(alpha: 0.3),
+            color: _getStatusColor(context).withOpacity(0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -138,7 +138,7 @@ class StatusIndicator extends StatelessWidget {
           if (isEmoji)
             Text(icon, style: const TextStyle(fontSize: 14))
           else
-            Icon(Icons.speed, size: 14, color: Colors.white),
+            const Icon(Icons.speed, size: 14, color: Colors.white),
           const SizedBox(width: 4),
           Text(
             label,
@@ -153,23 +153,30 @@ class StatusIndicator extends StatelessWidget {
     );
   }
 
-  List<Color> _getGradientColors() {
+  List<Color> _getGradientColors(BuildContext context) {
     if (!isInitialized) {
-      return [AppColors.surfaceLight, AppColors.surface];
+      return [
+        Theme.of(context).colorScheme.surface,
+        Theme.of(context).colorScheme.surfaceContainerHighest,
+      ];
     }
     if (!isRunning) {
-      return [AppColors.primary, AppColors.primaryDark];
+      return [
+        Theme.of(context).colorScheme.primary,
+        Theme.of(context).colorScheme.primaryFixedDim,
+      ];
     }
     if (isFallDetected) {
-      return [AppColors.danger, AppColors.danger.withValues(alpha: 0.8)];
+      return [AppPalette.danger, AppPalette.danger.withOpacity(0.8)];
     }
-    return [AppColors.safe, AppColors.safe.withValues(alpha: 0.8)];
+    return [AppPalette.safe, AppPalette.safe.withOpacity(0.8)];
   }
 
-  Color _getStatusColor() {
-    if (!isInitialized || !isRunning) return AppColors.primary;
-    if (isFallDetected) return AppColors.danger;
-    return AppColors.safe;
+  Color _getStatusColor(BuildContext context) {
+    if (!isInitialized || !isRunning)
+      return Theme.of(context).colorScheme.primary;
+    if (isFallDetected) return AppPalette.danger;
+    return AppPalette.safe;
   }
 
   IconData _getIcon() {

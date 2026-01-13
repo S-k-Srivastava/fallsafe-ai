@@ -24,8 +24,8 @@ class ControlButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isEnabled ? onPressed : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: isRunning ? AppColors.danger : AppColors.safe,
-          disabledBackgroundColor: AppColors.surfaceLight,
+          backgroundColor: isRunning ? AppPalette.danger : AppPalette.safe,
+          disabledBackgroundColor: Theme.of(context).disabledColor,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusFull),

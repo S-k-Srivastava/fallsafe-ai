@@ -15,19 +15,19 @@ class ActivityDisplay extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.surfaceBorder),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'DETECTED ACTIVITY',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: AppColors.textMuted,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               letterSpacing: 0.5,
             ),
           ),
@@ -47,12 +47,15 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Text(
           'Waiting for inference...',
-          style: TextStyle(color: AppColors.textMuted, fontSize: 14),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 14,
+          ),
         ),
       ),
     );
@@ -84,16 +87,16 @@ class _ActivityContent extends StatelessWidget {
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: result.isActivityFall
-                          ? AppColors.danger
-                          : AppColors.textPrimary,
+                          ? AppPalette.danger
+                          : Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     'Confidence: ${(result.activityConfidence * 100).toStringAsFixed(1)}%',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -101,9 +104,9 @@ class _ActivityContent extends StatelessWidget {
             ),
             Text(
               '${result.inferenceTimeMs}ms',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
-                color: AppColors.textMuted,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontFamily: 'monospace',
               ),
             ),
@@ -131,12 +134,12 @@ class _ActivityBars extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'All Activities',
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w500,
-            color: AppColors.textMuted,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -160,7 +163,9 @@ class _ActivityBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isFall = isFallActivity(index);
-    final color = isFall ? AppColors.danger : AppColors.primary;
+    final color = isFall
+        ? AppPalette.danger
+        : Theme.of(context).colorScheme.primary;
     final name = activityMap[index] ?? 'Unknown';
 
     return Row(
@@ -169,9 +174,9 @@ class _ActivityBar extends StatelessWidget {
           width: 100,
           child: Text(
             name,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
-              color: AppColors.textSecondary,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             overflow: TextOverflow.ellipsis,
           ),
@@ -183,7 +188,7 @@ class _ActivityBar extends StatelessWidget {
               Container(
                 height: 8,
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceLight,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -205,9 +210,9 @@ class _ActivityBar extends StatelessWidget {
           width: 36,
           child: Text(
             '${(probability * 100).toStringAsFixed(0)}%',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
-              color: AppColors.textMuted,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontFamily: 'monospace',
             ),
             textAlign: TextAlign.right,

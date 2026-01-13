@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import '../core/theme/app_colors.dart';
+import '../core/theme/app_colors.dart'; // Contains AppPalette
 import '../core/theme/app_spacing.dart';
 import '../models/detection_session.dart';
 import '../services/storage_service.dart';
@@ -12,6 +12,7 @@ class HistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -27,7 +28,7 @@ class HistoryScreen extends StatelessWidget {
                 final confirm = await showDialog<bool>(
                   context: context,
                   builder: (ctx) => AlertDialog(
-                    backgroundColor: theme.colorScheme.surface,
+                    backgroundColor: colorScheme.surface,
                     title: const Text('Clear All Sessions?'),
                     content: const Text('This action cannot be undone.'),
                     actions: [
@@ -38,7 +39,7 @@ class HistoryScreen extends StatelessWidget {
                       TextButton(
                         onPressed: () => Navigator.pop(ctx, true),
                         style: TextButton.styleFrom(
-                          foregroundColor: AppColors.danger,
+                          foregroundColor: AppPalette.danger,
                         ),
                         child: const Text('Clear All'),
                       ),
@@ -57,7 +58,7 @@ class HistoryScreen extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.delete_outline,
-                      color: AppColors.danger,
+                      color: AppPalette.danger,
                       size: 20,
                     ),
                     SizedBox(width: AppSpacing.sm),
@@ -82,21 +83,24 @@ class HistoryScreen extends StatelessWidget {
                   Icon(
                     Icons.history_rounded,
                     size: 64,
-                    color: AppColors.textMuted.withValues(alpha: 0.5),
+                    color: colorScheme.onSurfaceVariant.withOpacity(0.5),
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  const Text(
+                  Text(
                     'No Sessions Yet',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  const Text(
+                  Text(
                     'Start a detection session to see history here',
-                    style: TextStyle(fontSize: 14, color: AppColors.textMuted),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -124,7 +128,7 @@ class HistoryScreen extends StatelessWidget {
   void _showSessionDetails(BuildContext context, DetectionSession session) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
@@ -142,7 +146,7 @@ class HistoryScreen extends StatelessWidget {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         title: const Text('Delete Session?'),
         content: Text('Session from ${_formatDateTime(session.startTime)}'),
         actions: [
@@ -152,7 +156,7 @@ class HistoryScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+            style: TextButton.styleFrom(foregroundColor: AppPalette.danger),
             child: const Text('Delete'),
           ),
         ],
@@ -177,6 +181,8 @@ class _SessionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final hasFalls = session.fallsDetected > 0;
 
     return GestureDetector(
@@ -184,12 +190,12 @@ class _SessionCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           border: Border.all(
             color: hasFalls
-                ? AppColors.danger.withValues(alpha: 0.5)
-                : AppColors.surfaceBorder,
+                ? AppPalette.danger.withOpacity(0.5)
+                : theme.dividerColor,
           ),
         ),
         child: Column(
@@ -201,15 +207,15 @@ class _SessionCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
-                    color: (hasFalls ? AppColors.danger : AppColors.safe)
-                        .withValues(alpha: 0.2),
+                    color: (hasFalls ? AppPalette.danger : AppPalette.safe)
+                        .withOpacity(0.2),
                     borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                   ),
                   child: Icon(
                     hasFalls
                         ? Icons.warning_rounded
                         : Icons.check_circle_outline,
-                    color: hasFalls ? AppColors.danger : AppColors.safe,
+                    color: hasFalls ? AppPalette.danger : AppPalette.safe,
                     size: 20,
                   ),
                 ),
@@ -221,18 +227,18 @@ class _SessionCard extends StatelessWidget {
                     children: [
                       Text(
                         _formatDateTime(session.startTime),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         'Duration: ${session.durationString}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -241,7 +247,7 @@ class _SessionCard extends StatelessWidget {
                 // Delete button
                 IconButton(
                   icon: const Icon(Icons.delete_outline, size: 20),
-                  color: AppColors.textMuted,
+                  color: colorScheme.onSurfaceVariant,
                   onPressed: onDelete,
                 ),
               ],
@@ -271,9 +277,9 @@ class _SessionCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.sm),
               Text(
                 'Last activity: ${session.lastActivity}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
-                  color: AppColors.textMuted,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -298,9 +304,10 @@ class _StatChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final color = isAlert ? AppColors.danger : theme.hintColor;
-    final bgColor = isDark ? AppColors.surfaceLight : const Color(0xFFF0F0F0);
+    final color = isAlert ? AppPalette.danger : theme.hintColor;
+    final bgColor = theme.brightness == Brightness.dark
+        ? AppPalette.surfaceLightDark
+        : const Color(0xFFF0F0F0);
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -330,6 +337,9 @@ class _SessionDetailsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return DraggableScrollableSheet(
       initialChildSize: 0.6,
       minChildSize: 0.3,
@@ -344,7 +354,7 @@ class _SessionDetailsSheet extends StatelessWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.textMuted,
+                color: theme.dividerColor,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -353,20 +363,20 @@ class _SessionDetailsSheet extends StatelessWidget {
               padding: const EdgeInsets.all(AppSpacing.md),
               child: Row(
                 children: [
-                  const Icon(Icons.history, color: AppColors.primary),
+                  Icon(Icons.history, color: colorScheme.primary),
                   const SizedBox(width: AppSpacing.sm),
                   Text(
                     'Session Details',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                 ],
               ),
             ),
-            const Divider(height: 1, color: AppColors.surfaceBorder),
+            Divider(height: 1, color: theme.dividerColor),
             // Content
             Expanded(
               child: ListView(
@@ -374,26 +384,28 @@ class _SessionDetailsSheet extends StatelessWidget {
                 padding: const EdgeInsets.all(AppSpacing.md),
                 children: [
                   // Summary card
-                  _buildSummaryCard(),
+                  _buildSummaryCard(context),
                   const SizedBox(height: AppSpacing.md),
                   // Events list
-                  const Text(
+                  Text(
                     'EVENTS',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textMuted,
+                      color: colorScheme.onSurfaceVariant,
                       letterSpacing: 0.5,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   if (session.events.isEmpty)
-                    const Text(
+                    Text(
                       'No events recorded',
-                      style: TextStyle(color: AppColors.textMuted),
+                      style: TextStyle(color: colorScheme.onSurfaceVariant),
                     )
                   else
-                    ...session.events.reversed.map(_buildEventTile),
+                    ...session.events.reversed.map(
+                      (e) => _buildEventTile(e, context),
+                    ),
                 ],
               ),
             ),
@@ -403,69 +415,94 @@ class _SessionDetailsSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryCard() {
+  Widget _buildSummaryCard(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
+        color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Session info
-          const Text(
+          Text(
             'SESSION INFO',
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w600,
-              color: AppColors.primary,
+              color: colorScheme.primary,
               letterSpacing: 0.5,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          _SummaryRow('Start Time', _formatDateTime(session.startTime)),
+          _SummaryRow(
+            'Start Time',
+            _formatDateTime(session.startTime),
+            context: context,
+          ),
           if (session.endTime != null)
-            _SummaryRow('End Time', _formatDateTime(session.endTime!)),
-          _SummaryRow('Duration', session.durationString),
+            _SummaryRow(
+              'End Time',
+              _formatDateTime(session.endTime!),
+              context: context,
+            ),
+          _SummaryRow('Duration', session.durationString, context: context),
 
-          const Divider(height: AppSpacing.lg, color: AppColors.surfaceBorder),
+          Divider(height: AppSpacing.lg, color: theme.dividerColor),
 
           // Results
-          const Text(
+          Text(
             'RESULTS',
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w600,
-              color: AppColors.primary,
+              color: colorScheme.primary,
               letterSpacing: 0.5,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          _SummaryRow('Total Frames', session.totalFrames.toString()),
-          _SummaryRow('Total Inferences', session.totalInferences.toString()),
+          _SummaryRow(
+            'Total Frames',
+            session.totalFrames.toString(),
+            context: context,
+          ),
+          _SummaryRow(
+            'Total Inferences',
+            session.totalInferences.toString(),
+            context: context,
+          ),
           _SummaryRow(
             'Falls Detected',
             session.fallsDetected.toString(),
             highlight: session.fallsDetected > 0,
+            context: context,
           ),
           if (session.maxFallProbability != null)
             _SummaryRow(
               'Max Fall Prob',
               '${(session.maxFallProbability! * 100).toStringAsFixed(1)}%',
+              context: context,
             ),
           if (session.lastActivity != null)
-            _SummaryRow('Last Activity', session.lastActivity!),
+            _SummaryRow(
+              'Last Activity',
+              session.lastActivity!,
+              context: context,
+            ),
 
-          const Divider(height: AppSpacing.lg, color: AppColors.surfaceBorder),
+          Divider(height: AppSpacing.lg, color: theme.dividerColor),
 
           // Detection settings used
-          const Text(
+          Text(
             'DETECTION SETTINGS',
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w600,
-              color: AppColors.primary,
+              color: colorScheme.primary,
               letterSpacing: 0.5,
             ),
           ),
@@ -473,29 +510,45 @@ class _SessionDetailsSheet extends StatelessWidget {
           _SummaryRow(
             'Fall Threshold',
             '${(session.fallThreshold * 100).toInt()}%',
+            context: context,
           ),
           _SummaryRow(
             'Confirm Threshold',
             '${(session.confirmationThreshold * 100).toInt()}%',
+            context: context,
           ),
-          _SummaryRow('Confirm Frames', '${session.confirmationFrames} frames'),
-          _SummaryRow('Cooldown', '${session.cooldownSeconds} seconds'),
+          _SummaryRow(
+            'Confirm Frames',
+            '${session.confirmationFrames} frames',
+            context: context,
+          ),
+          _SummaryRow(
+            'Cooldown',
+            '${session.cooldownSeconds} seconds',
+            context: context,
+          ),
           _SummaryRow(
             'Inference Rate',
             '1/${session.inferenceSkipFrames} frames',
+            context: context,
           ),
-          _SummaryRow('Impact Gate', session.enableImpactGate ? 'ON' : 'OFF'),
+          _SummaryRow(
+            'Impact Gate',
+            session.enableImpactGate ? 'ON' : 'OFF',
+            context: context,
+          ),
           if (session.enableImpactGate)
             _SummaryRow(
               'Impact Threshold',
               '${session.impactThreshold.toInt()} m/s²',
+              context: context,
             ),
         ],
       ),
     );
   }
 
-  Widget _buildEventTile(SessionEvent event) {
+  Widget _buildEventTile(SessionEvent event, BuildContext context) {
     IconData icon;
     Color color;
     String title;
@@ -503,37 +556,37 @@ class _SessionDetailsSheet extends StatelessWidget {
     switch (event.type) {
       case SessionEventType.sessionStart:
         icon = Icons.play_circle_outline;
-        color = AppColors.safe;
+        color = AppPalette.safe;
         title = 'Session Started';
         break;
       case SessionEventType.sessionEnd:
         icon = Icons.stop_circle_outlined;
-        color = AppColors.primary;
+        color = Theme.of(context).colorScheme.primary;
         title = 'Session Ended';
         break;
       case SessionEventType.fallDetected:
         icon = Icons.warning_rounded;
-        color = AppColors.danger;
+        color = AppPalette.danger;
         title = 'Fall Confirmed';
         break;
       case SessionEventType.activityChanged:
         icon = Icons.directions_walk;
-        color = AppColors.primaryLight;
+        color = AppPalette.primaryLight;
         title = 'Activity: ${event.activity ?? "Unknown"}';
         break;
       case SessionEventType.bufferFilled:
         icon = Icons.check_circle_outline;
-        color = AppColors.safe;
+        color = AppPalette.safe;
         title = 'Buffer Ready';
         break;
       case SessionEventType.impactDetected:
         icon = Icons.speed;
-        color = AppColors.warning;
+        color = AppPalette.warning;
         title = 'Impact Detected';
         break;
       case SessionEventType.cooldownActive:
         icon = Icons.timer;
-        color = AppColors.textMuted;
+        color = Theme.of(context).colorScheme.onSurfaceVariant;
         title = 'Cooldown Active';
         break;
     }
@@ -551,25 +604,26 @@ class _SessionDetailsSheet extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 if (event.details != null)
                   Text(
                     event.details!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
-                      color: AppColors.textMuted,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      height: 1.3,
                     ),
                   ),
                 Text(
                   _formatTime(event.timestamp),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 10,
-                    color: AppColors.textMuted,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -594,11 +648,20 @@ class _SummaryRow extends StatelessWidget {
   final String label;
   final String value;
   final bool highlight;
+  final BuildContext? context; // Pass context if needed, or lookup
 
-  const _SummaryRow(this.label, this.value, {this.highlight = false});
+  const _SummaryRow(
+    this.label,
+    this.value, {
+    this.highlight = false,
+    this.context,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // If context was passed in props use it, otherwise use local context (preferred)
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -606,14 +669,19 @@ class _SummaryRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+            style: TextStyle(
+              fontSize: 12,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
           Text(
             value,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: highlight ? AppColors.danger : AppColors.textPrimary,
+              color: highlight
+                  ? AppPalette.danger
+                  : theme.colorScheme.onSurface,
             ),
           ),
         ],
@@ -636,9 +704,15 @@ String _formatDateTime(DateTime dt) {
     dateStr = '${dt.day}/${dt.month}/${dt.year}';
   }
 
+  // 12-hour format with AM/PM applied here
   return '$dateStr at ${_formatTime(dt)}';
 }
 
 String _formatTime(DateTime dt) {
-  return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:${dt.second.toString().padLeft(2, '0')}';
+  // 12-hour format with AM/PM
+  final hour = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
+  final minute = dt.minute.toString().padLeft(2, '0');
+  final second = dt.second.toString().padLeft(2, '0');
+  final period = dt.hour >= 12 ? 'PM' : 'AM';
+  return '$hour:$minute:$second $period';
 }

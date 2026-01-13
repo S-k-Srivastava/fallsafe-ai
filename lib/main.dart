@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_controller.dart';
 import 'screens/home_screen.dart';
@@ -22,55 +22,41 @@ class FallSafeApp extends StatefulWidget {
 }
 
 class _FallSafeAppState extends State<FallSafeApp> {
-  bool _isDarkMode = true;
-
-  void _toggleTheme() {
-    setState(() {
-      _isDarkMode = !_isDarkMode;
-    });
-
-    // Update system UI overlay style
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: _isDarkMode
-            ? Brightness.light
-            : Brightness.dark,
-        systemNavigationBarColor: _isDarkMode ? Colors.black : Colors.white,
-        systemNavigationBarIconBrightness: _isDarkMode
-            ? Brightness.light
-            : Brightness.dark,
-      ),
-    );
-  }
+  late final ThemeController _themeController;
 
   @override
   void initState() {
     super.initState();
-    // Set initial system UI overlay style
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: Colors.black,
-        systemNavigationBarIconBrightness: Brightness.light,
-      ),
-    );
+    _themeController = ThemeController();
+  }
+
+  @override
+  void dispose() {
+    _themeController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ThemeController(
-      isDarkMode: _isDarkMode,
-      toggleTheme: _toggleTheme,
-      child: MaterialApp(
-        title: 'FallSafe',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light,
-        darkTheme: AppTheme.dark,
-        themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
-        home: const HomeScreen(),
-      ),
+    return ListenableBuilder(
+      listenable: _themeController,
+      builder: (context, _) {
+        return MaterialApp(
+          title: 'FallSafe',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          themeMode: _themeController.themeMode,
+          // Provide controller to children via a builder or provider if not using a library.
+          // Since we aren't using Provider package, we can just pass it or use a simple InheritedWidget wrapper.
+          // Given the size, I'll wrap HomeScreen in a simple InheritedWidget or just pass it?
+          // Actually, let's keep the InheritedWidget approach but wrapping the ChangeNotifier.
+          builder: (context, child) {
+            return ThemeProvider(controller: _themeController, child: child!);
+          },
+          home: const HomeScreen(),
+        );
+      },
     );
   }
 }

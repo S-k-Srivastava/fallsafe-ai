@@ -3,58 +3,46 @@ import 'app_colors.dart';
 import 'app_spacing.dart';
 
 /// Light mode colors
-abstract class AppColorsLight {
-  static const Color primary = Color(0xFF6366F1);
-  static const Color primaryLight = Color(0xFF818CF8);
-  static const Color primaryDark = Color(0xFF4F46E5);
-  static const Color background = Color(0xFFF5F5F5);
-  static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceLight = Color(0xFFF0F0F0);
-  static const Color surfaceBorder = Color(0xFFE0E0E0);
-  static const Color safe = Color(0xFF10B981);
-  static const Color warning = Color(0xFFF59E0B);
-  static const Color danger = Color(0xFFEF4444);
-  static const Color textPrimary = Color(0xFF1A1A1A);
-  static const Color textSecondary = Color(0xFF666666);
-  static const Color textMuted = Color(0xFF999999);
-}
 
 /// Main app theme using Material 3
 class AppTheme {
   static ThemeData get dark => ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
-    scaffoldBackgroundColor: AppColors.background,
+    scaffoldBackgroundColor: AppPalette.backgroundDark,
     colorScheme: const ColorScheme.dark(
-      primary: AppColors.primary,
-      onPrimary: AppColors.textPrimary,
-      secondary: AppColors.primaryLight,
-      surface: AppColors.surface,
-      onSurface: AppColors.textPrimary,
-      error: AppColors.danger,
+      primary: AppPalette.primary,
+      onPrimary: AppPalette.textPrimaryDark,
+      secondary: AppPalette.primaryLight,
+      surface: AppPalette.surfaceDark,
+      onSurface: AppPalette.textPrimaryDark,
+      surfaceContainerHighest: AppPalette.surfaceLightDark,
+      error: AppPalette.danger,
+      outline: AppPalette.surfaceBorderDark,
     ),
+    dividerColor: AppPalette.surfaceBorderDark,
     appBarTheme: const AppBarTheme(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppPalette.backgroundDark,
       elevation: 0,
       centerTitle: false,
       titleTextStyle: TextStyle(
-        color: AppColors.textPrimary,
+        color: AppPalette.textPrimaryDark,
         fontSize: 18,
         fontWeight: FontWeight.w600,
       ),
     ),
     cardTheme: CardThemeData(
-      color: AppColors.surface,
+      color: AppPalette.surfaceDark,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        side: const BorderSide(color: AppColors.surfaceBorder, width: 1),
+        side: const BorderSide(color: AppPalette.surfaceBorderDark, width: 1),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppPalette.primary,
+        foregroundColor: AppPalette.textPrimaryDark,
         elevation: 0,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
@@ -66,7 +54,7 @@ class AppTheme {
       ),
     ),
     dividerTheme: const DividerThemeData(
-      color: AppColors.surfaceBorder,
+      color: AppPalette.surfaceBorderDark,
       thickness: 1,
     ),
   );
@@ -74,37 +62,40 @@ class AppTheme {
   static ThemeData get light => ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
-    scaffoldBackgroundColor: AppColorsLight.background,
+    scaffoldBackgroundColor: AppPalette.backgroundLight,
     colorScheme: const ColorScheme.light(
-      primary: AppColorsLight.primary,
+      primary: AppPalette.primary,
       onPrimary: Colors.white,
-      secondary: AppColorsLight.primaryLight,
-      surface: AppColorsLight.surface,
-      onSurface: AppColorsLight.textPrimary,
-      error: AppColorsLight.danger,
+      secondary: AppPalette.primaryLight,
+      surface: AppPalette.surfaceLight,
+      onSurface: AppPalette.textPrimaryLight,
+      surfaceContainerHighest: AppPalette.surfaceLightVariant,
+      error: AppPalette.danger,
+      outline: AppPalette.surfaceBorderLight,
     ),
+    dividerColor: AppPalette.surfaceBorderLight,
     appBarTheme: const AppBarTheme(
-      backgroundColor: AppColorsLight.background,
+      backgroundColor: AppPalette.backgroundLight,
       elevation: 0,
       centerTitle: false,
       titleTextStyle: TextStyle(
-        color: AppColorsLight.textPrimary,
+        color: AppPalette.textPrimaryLight,
         fontSize: 18,
         fontWeight: FontWeight.w600,
       ),
-      iconTheme: IconThemeData(color: AppColorsLight.textSecondary),
+      iconTheme: IconThemeData(color: AppPalette.textSecondaryLight),
     ),
     cardTheme: CardThemeData(
-      color: AppColorsLight.surface,
+      color: AppPalette.surfaceLight,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        side: const BorderSide(color: AppColorsLight.surfaceBorder, width: 1),
+        side: const BorderSide(color: AppPalette.surfaceBorderLight, width: 1),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColorsLight.primary,
+        backgroundColor: AppPalette.primary,
         foregroundColor: Colors.white,
         elevation: 0,
         padding: const EdgeInsets.symmetric(
@@ -117,7 +108,7 @@ class AppTheme {
       ),
     ),
     dividerTheme: const DividerThemeData(
-      color: AppColorsLight.surfaceBorder,
+      color: AppPalette.surfaceBorderLight,
       thickness: 1,
     ),
   );

@@ -24,9 +24,9 @@ class SensorChart extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.surfaceBorder),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,39 +36,45 @@ class SensorChart extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
-              _buildLegend(),
+              _buildLegend(context),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
           SizedBox(
             height: height,
-            child: data.isEmpty ? _buildEmptyState() : _buildChart(),
+            child: data.isEmpty
+                ? _buildEmptyState(context)
+                : _buildChart(context),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildLegend() {
+  Widget _buildLegend(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _legendDot(AppColors.chartX, 'X'),
+        _legendDot(AppPalette.chartX, 'X', context: context),
         const SizedBox(width: AppSpacing.sm),
-        _legendDot(AppColors.chartY, 'Y'),
+        _legendDot(AppPalette.chartY, 'Y', context: context),
         const SizedBox(width: AppSpacing.sm),
-        _legendDot(AppColors.chartZ, 'Z'),
+        _legendDot(AppPalette.chartZ, 'Z', context: context),
       ],
     );
   }
 
-  Widget _legendDot(Color color, String label) {
+  Widget _legendDot(
+    Color color,
+    String label, {
+    required BuildContext context,
+  }) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -80,22 +86,28 @@ class SensorChart extends StatelessWidget {
         const SizedBox(width: 2),
         Text(
           label,
-          style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+          style: TextStyle(
+            fontSize: 10,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildEmptyState() {
-    return const Center(
+  Widget _buildEmptyState(BuildContext context) {
+    return Center(
       child: Text(
         'Waiting for data...',
-        style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          fontSize: 12,
+        ),
       ),
     );
   }
 
-  Widget _buildChart() {
+  Widget _buildChart(BuildContext context) {
     final spots = _generateSpots();
 
     return LineChart(
@@ -105,7 +117,7 @@ class SensorChart extends StatelessWidget {
           drawVerticalLine: false,
           horizontalInterval: _getInterval(),
           getDrawingHorizontalLine: (value) =>
-              FlLine(color: AppColors.surfaceBorder, strokeWidth: 1),
+              FlLine(color: Theme.of(context).dividerColor, strokeWidth: 1),
         ),
         titlesData: FlTitlesData(
           show: true,
@@ -126,8 +138,8 @@ class SensorChart extends StatelessWidget {
               getTitlesWidget: (value, meta) {
                 return Text(
                   value.toStringAsFixed(0),
-                  style: const TextStyle(
-                    color: AppColors.textMuted,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 10,
                   ),
                 );
@@ -165,9 +177,9 @@ class SensorChart extends StatelessWidget {
     }
 
     return [
-      _createLine(xSpots, AppColors.chartX),
-      _createLine(ySpots, AppColors.chartY),
-      _createLine(zSpots, AppColors.chartZ),
+      _createLine(xSpots, AppPalette.chartX),
+      _createLine(ySpots, AppPalette.chartY),
+      _createLine(zSpots, AppPalette.chartZ),
     ];
   }
 

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/detection_session.dart';
@@ -26,6 +27,7 @@ class StorageService {
 
     // Open boxes
     _sessionsBox = await Hive.openBox<DetectionSession>(_sessionsBoxName);
+    await _initSettings();
     debugPrint(
       "✅ [STORAGE] Hive initialized. Sessions: ${_sessionsBox!.length}",
     );
@@ -96,4 +98,27 @@ class StorageService {
   /// Listen to sessions changes
   static ValueListenable<Box<DetectionSession>> get sessionsListenable =>
       sessionsBox.listenable();
+
+  // Settings Box
+  static const String _settingsBoxName = 'app_settings';
+  static Box? _settingsBox;
+
+  static Box get _settings => _settingsBox!;
+
+  static Future<void> _initSettings() async {
+    _settingsBox = await Hive.openBox(_settingsBoxName);
+  }
+
+  static Future<void> saveThemeMode(ThemeMode mode) async {
+    await _settings.put('theme_mode', mode.toString());
+  }
+
+  static ThemeMode getThemeMode() {
+    final saved = _settings.get('theme_mode');
+    if (saved == null) return ThemeMode.system;
+    return ThemeMode.values.firstWhere(
+      (e) => e.toString() == saved,
+      orElse: () => ThemeMode.system,
+    );
+  }
 }

@@ -65,13 +65,15 @@ class _SettingsPanelState extends State<SettingsPanel> {
   @override
   Widget build(BuildContext context) {
     final isDisabled = widget.isRunning;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.surfaceBorder),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,12 +82,12 @@ class _SettingsPanelState extends State<SettingsPanel> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'DETECTION SETTINGS',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textMuted,
+                  color: colorScheme.onSurfaceVariant,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -96,12 +98,12 @@ class _SettingsPanelState extends State<SettingsPanel> {
                     vertical: AppSpacing.xs,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withValues(alpha: 0.2),
+                    color: AppPalette.warning.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                   ),
                   child: const Text(
                     'Locked while running',
-                    style: TextStyle(fontSize: 10, color: AppColors.warning),
+                    style: TextStyle(fontSize: 10, color: AppPalette.warning),
                   ),
                 ),
             ],
@@ -110,6 +112,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
 
           // === BASIC THRESHOLD ===
           _buildSliderSetting(
+            context: context,
             label: 'Fall Threshold (Display)',
             value: _fallThreshold,
             min: 0.1,
@@ -123,21 +126,22 @@ class _SettingsPanelState extends State<SettingsPanel> {
               _updateSettings();
             },
           ),
-          const Divider(height: AppSpacing.lg, color: AppColors.surfaceBorder),
+          Divider(height: AppSpacing.lg, color: theme.dividerColor),
 
           // === TEMPORAL CONFIRMATION ===
-          const Text(
+          Text(
             'TEMPORAL CONFIRMATION',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: AppColors.primary,
+              color: colorScheme.primary,
               letterSpacing: 0.5,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
 
           _buildSliderSetting(
+            context: context,
             label: 'Confirmation Threshold',
             value: _confirmationThreshold,
             min: 0.5,
@@ -153,6 +157,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
           ),
 
           _buildIntSliderSetting(
+            context: context,
             label: 'Confirmation Frames',
             value: _confirmationFrames,
             min: 1,
@@ -165,21 +170,22 @@ class _SettingsPanelState extends State<SettingsPanel> {
               _updateSettings();
             },
           ),
-          const Divider(height: AppSpacing.lg, color: AppColors.surfaceBorder),
+          Divider(height: AppSpacing.lg, color: theme.dividerColor),
 
           // === COOLDOWN ===
-          const Text(
+          Text(
             'COOLDOWN PERIOD',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: AppColors.primary,
+              color: colorScheme.primary,
               letterSpacing: 0.5,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
 
           _buildIntSliderSetting(
+            context: context,
             label: 'Cooldown Duration',
             value: _cooldownSeconds,
             min: 5,
@@ -192,21 +198,22 @@ class _SettingsPanelState extends State<SettingsPanel> {
               _updateSettings();
             },
           ),
-          const Divider(height: AppSpacing.lg, color: AppColors.surfaceBorder),
+          Divider(height: AppSpacing.lg, color: theme.dividerColor),
 
           // === INFERENCE FREQUENCY ===
-          const Text(
+          Text(
             'INFERENCE FREQUENCY',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: AppColors.primary,
+              color: colorScheme.primary,
               letterSpacing: 0.5,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
 
           _buildIntSliderSetting(
+            context: context,
             label: 'Inference Every N Frames',
             value: _inferenceSkipFrames,
             min: 1,
@@ -219,21 +226,22 @@ class _SettingsPanelState extends State<SettingsPanel> {
               _updateSettings();
             },
           ),
-          const Divider(height: AppSpacing.lg, color: AppColors.surfaceBorder),
+          Divider(height: AppSpacing.lg, color: theme.dividerColor),
 
           // === IMPACT GATE ===
-          const Text(
+          Text(
             'IMPACT GATE',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: AppColors.primary,
+              color: colorScheme.primary,
               letterSpacing: 0.5,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
 
           _buildSwitchSetting(
+            context: context,
             label: 'Enable Impact Gate',
             value: _enableImpactGate,
             description: 'Require acceleration impact before detection',
@@ -247,6 +255,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
           if (_enableImpactGate) ...[
             const SizedBox(height: AppSpacing.sm),
             _buildSliderSetting(
+              context: context,
               label: 'Impact Threshold',
               value: _impactThreshold,
               min: 5.0,
@@ -267,6 +276,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
   }
 
   Widget _buildSliderSetting({
+    required BuildContext context,
     required String label,
     required double value,
     required double min,
@@ -277,6 +287,9 @@ class _SettingsPanelState extends State<SettingsPanel> {
     required bool isDisabled,
     required ValueChanged<double> onChanged,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Column(
@@ -292,8 +305,8 @@ class _SettingsPanelState extends State<SettingsPanel> {
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: isDisabled
-                        ? AppColors.textMuted
-                        : AppColors.textPrimary,
+                        ? colorScheme.onSurfaceVariant
+                        : colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -303,15 +316,15 @@ class _SettingsPanelState extends State<SettingsPanel> {
                   vertical: 2,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.2),
+                  color: colorScheme.primary.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                 ),
                 child: Text(
                   displayValue,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
+                    color: colorScheme.primary,
                   ),
                 ),
               ),
@@ -320,11 +333,13 @@ class _SettingsPanelState extends State<SettingsPanel> {
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: isDisabled
-                  ? AppColors.textMuted
-                  : AppColors.primary,
-              inactiveTrackColor: AppColors.surfaceLight,
-              thumbColor: isDisabled ? AppColors.textMuted : AppColors.primary,
-              overlayColor: AppColors.primary.withValues(alpha: 0.2),
+                  ? colorScheme.onSurfaceVariant
+                  : colorScheme.primary,
+              inactiveTrackColor: colorScheme.surfaceContainerHighest,
+              thumbColor: isDisabled
+                  ? colorScheme.onSurfaceVariant
+                  : colorScheme.primary,
+              overlayColor: colorScheme.primary.withValues(alpha: 0.2),
               trackHeight: 3,
             ),
             child: Slider(
@@ -337,7 +352,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
           ),
           Text(
             description,
-            style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+            style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -345,6 +360,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
   }
 
   Widget _buildIntSliderSetting({
+    required BuildContext context,
     required String label,
     required int value,
     required int min,
@@ -355,6 +371,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
     required ValueChanged<int> onChanged,
   }) {
     return _buildSliderSetting(
+      context: context,
       label: label,
       value: value.toDouble(),
       min: min.toDouble(),
@@ -368,12 +385,16 @@ class _SettingsPanelState extends State<SettingsPanel> {
   }
 
   Widget _buildSwitchSetting({
+    required BuildContext context,
     required String label,
     required bool value,
     required String description,
     required bool isDisabled,
     required ValueChanged<bool> onChanged,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.xs),
       child: Row(
@@ -388,15 +409,15 @@ class _SettingsPanelState extends State<SettingsPanel> {
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: isDisabled
-                        ? AppColors.textMuted
-                        : AppColors.textPrimary,
+                        ? colorScheme.onSurfaceVariant
+                        : colorScheme.onSurface,
                   ),
                 ),
                 Text(
                   description,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 10,
-                    color: AppColors.textMuted,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -405,8 +426,8 @@ class _SettingsPanelState extends State<SettingsPanel> {
           Switch(
             value: value,
             onChanged: isDisabled ? null : onChanged,
-            activeColor: AppColors.primary,
-            inactiveTrackColor: AppColors.surfaceLight,
+            activeColor: colorScheme.primary,
+            inactiveTrackColor: colorScheme.surfaceContainerHighest,
           ),
         ],
       ),

@@ -88,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusLg),
@@ -114,12 +114,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         centerTitle: false,
         title: Row(
@@ -130,17 +132,17 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.primary, AppColors.primaryLight],
+                  colors: [colorScheme.primary, colorScheme.secondary],
                 ),
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: const Text(
+              child: Text(
                 'F',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                  letterSpacing: -1,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  letterSpacing: 0.5,
                 ),
               ),
             ),
@@ -150,9 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: isDarkMode
-                    ? AppColors.textPrimary
-                    : const Color(0xFF1A1A1A),
+                color: colorScheme.onSurface,
                 letterSpacing: -0.5,
               ),
             ),
@@ -162,9 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
           // History button
           IconButton(
             icon: const Icon(Icons.history_rounded),
-            color: isDarkMode
-                ? AppColors.textSecondary
-                : const Color(0xFF666666),
+            color: colorScheme.onSurfaceVariant,
             onPressed: _openHistory,
             tooltip: 'Session History',
           ),
@@ -173,10 +171,8 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(
               isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
             ),
-            color: isDarkMode
-                ? AppColors.textSecondary
-                : const Color(0xFF666666),
-            onPressed: () => ThemeController.of(context)?.toggleTheme(),
+            color: colorScheme.onSurfaceVariant,
+            onPressed: () => ThemeController.of(context).toggleTheme(),
             tooltip: isDarkMode ? 'Light Mode' : 'Dark Mode',
           ),
         ],
@@ -200,30 +196,33 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: const EdgeInsets.all(AppSpacing.xl),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: Theme.of(context).colorScheme.surface,
               shape: BoxShape.circle,
-              border: Border.all(color: AppColors.surfaceBorder),
+              border: Border.all(color: Theme.of(context).dividerColor),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.sensors_rounded,
               size: 64,
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
-          const Text(
+          Text(
             'Sensor Permission Required',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          const Text(
+          Text(
             'FallSafe needs access to your device sensors (accelerometer and gyroscope) to detect falls.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+            style: TextStyle(
+              fontSize: 14,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: AppSpacing.xl),
           SizedBox(
@@ -282,13 +281,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 label: 'Buffer',
                 value: '${_controller.bufferSize}/${_controller.windowSize}',
                 valueColor: _controller.bufferSize >= _controller.windowSize
-                    ? AppColors.safe
-                    : AppColors.textPrimary,
+                    ? AppPalette.safe
+                    : Theme.of(context).colorScheme.onSurface,
               ),
               StatItem(
                 label: 'Inferences',
                 value: _controller.inferenceCount.toString(),
-                valueColor: AppColors.primary,
+                valueColor: Theme.of(context).colorScheme.primary,
               ),
             ],
           ),
@@ -325,19 +324,19 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.surfaceBorder),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'LIVE SENSOR VALUES',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: AppColors.textMuted,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               letterSpacing: 0.5,
             ),
           ),
@@ -354,7 +353,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   unit: 'm/s²',
                 ),
               ),
-              Container(width: 1, height: 80, color: AppColors.surfaceBorder),
+              Container(
+                width: 1,
+                height: 80,
+                color: Theme.of(context).dividerColor,
+              ),
               Expanded(
                 child: _SensorValueColumn(
                   title: 'Gyroscope',
@@ -396,18 +399,18 @@ class _SensorValueColumn extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: AppColors.textMuted,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          _ValueRow('X', x, AppColors.chartX),
-          _ValueRow('Y', y, AppColors.chartY),
-          _ValueRow('Z', z, AppColors.chartZ),
+          _ValueRow('X', x, AppPalette.chartX),
+          _ValueRow('Y', y, AppPalette.chartY),
+          _ValueRow('Z', z, AppPalette.chartZ),
           const Divider(height: AppSpacing.md),
-          _ValueRow('Magnitude', magnitude, AppColors.chartMagnitude),
+          _ValueRow('Magnitude', magnitude, AppPalette.chartMagnitude),
         ],
       ),
     );
@@ -438,19 +441,19 @@ class _ValueRow extends StatelessWidget {
               const SizedBox(width: AppSpacing.xs),
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
           ),
           Text(
             value.toStringAsFixed(2),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
               fontFamily: 'monospace',
             ),
           ),
@@ -506,7 +509,7 @@ class _SettingsDialogState extends State<_SettingsDialog> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.textMuted,
+                color: Theme.of(context).dividerColor,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -516,12 +519,12 @@ class _SettingsDialogState extends State<_SettingsDialog> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Detection Settings',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   TextButton(
@@ -531,7 +534,7 @@ class _SettingsDialogState extends State<_SettingsDialog> {
                 ],
               ),
             ),
-            const Divider(height: 1, color: AppColors.surfaceBorder),
+            Divider(height: 1, color: Theme.of(context).dividerColor),
             // Settings content
             Expanded(
               child: SingleChildScrollView(
@@ -553,18 +556,18 @@ class _SettingsDialogState extends State<_SettingsDialog> {
                 child: ElevatedButton(
                   onPressed: widget.onStart,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.safe,
+                    backgroundColor: AppPalette.safe,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                     ),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.play_arrow_rounded, size: 24),
-                      SizedBox(width: AppSpacing.sm),
-                      Text(
+                      const Icon(Icons.play_arrow_rounded, size: 24),
+                      const SizedBox(width: AppSpacing.sm),
+                      const Text(
                         'Start Detection',
                         style: TextStyle(
                           fontSize: 16,
