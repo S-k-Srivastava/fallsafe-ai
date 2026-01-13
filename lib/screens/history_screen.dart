@@ -406,12 +406,37 @@ class _SessionDetailsSheet extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Session info
+          const Text(
+            'SESSION INFO',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
           _SummaryRow('Start Time', _formatDateTime(session.startTime)),
           if (session.endTime != null)
             _SummaryRow('End Time', _formatDateTime(session.endTime!)),
           _SummaryRow('Duration', session.durationString),
-          _SummaryRow('Threshold', '${(session.fallThreshold * 100).toInt()}%'),
+
+          const Divider(height: AppSpacing.lg, color: AppColors.surfaceBorder),
+
+          // Results
+          const Text(
+            'RESULTS',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
           _SummaryRow('Total Frames', session.totalFrames.toString()),
           _SummaryRow('Total Inferences', session.totalInferences.toString()),
           _SummaryRow(
@@ -426,6 +451,40 @@ class _SessionDetailsSheet extends StatelessWidget {
             ),
           if (session.lastActivity != null)
             _SummaryRow('Last Activity', session.lastActivity!),
+
+          const Divider(height: AppSpacing.lg, color: AppColors.surfaceBorder),
+
+          // Detection settings used
+          const Text(
+            'DETECTION SETTINGS',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          _SummaryRow(
+            'Fall Threshold',
+            '${(session.fallThreshold * 100).toInt()}%',
+          ),
+          _SummaryRow(
+            'Confirm Threshold',
+            '${(session.confirmationThreshold * 100).toInt()}%',
+          ),
+          _SummaryRow('Confirm Frames', '${session.confirmationFrames} frames'),
+          _SummaryRow('Cooldown', '${session.cooldownSeconds} seconds'),
+          _SummaryRow(
+            'Inference Rate',
+            '1/${session.inferenceSkipFrames} frames',
+          ),
+          _SummaryRow('Impact Gate', session.enableImpactGate ? 'ON' : 'OFF'),
+          if (session.enableImpactGate)
+            _SummaryRow(
+              'Impact Threshold',
+              '${session.impactThreshold.toInt()} m/s²',
+            ),
         ],
       ),
     );
@@ -450,7 +509,7 @@ class _SessionDetailsSheet extends StatelessWidget {
       case SessionEventType.fallDetected:
         icon = Icons.warning_rounded;
         color = AppColors.danger;
-        title = 'Fall Detected';
+        title = 'Fall Confirmed';
         break;
       case SessionEventType.activityChanged:
         icon = Icons.directions_walk;
@@ -461,6 +520,16 @@ class _SessionDetailsSheet extends StatelessWidget {
         icon = Icons.check_circle_outline;
         color = AppColors.safe;
         title = 'Buffer Ready';
+        break;
+      case SessionEventType.impactDetected:
+        icon = Icons.speed;
+        color = AppColors.warning;
+        title = 'Impact Detected';
+        break;
+      case SessionEventType.cooldownActive:
+        icon = Icons.timer;
+        color = AppColors.textMuted;
+        title = 'Cooldown Active';
         break;
     }
 

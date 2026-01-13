@@ -1,28 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
 
 /// Service for handling runtime permissions
 class PermissionService {
   /// Check if sensor permissions are granted
+  /// Note: Accelerometer and Gyroscope don't require runtime permission on most Android versions
+  /// BODY_SENSORS permission is for heart rate, step counter etc. (not acc/gyro)
   static Future<bool> hasSensorPermission() async {
-    // On Android 13+, body sensors need explicit permission
-    final status = await Permission.sensors.status;
-    debugPrint("📋 [PERMISSION] Sensor status: $status");
+    // On iOS, motion sensors don't require permission
+    if (Platform.isIOS) {
+      debugPrint("📋 [PERMISSION] iOS: Sensors don't require permission");
+      return true;
+    }
+
+    // On Android, accelerometer and gyroscope are non-dangerous sensors
+    // They don't require runtime permission, only manifest declaration
+    // BODY_SENSORS is for heart rate, step counter, etc. which we don't use
+    debugPrint(
+      "📋 [PERMISSION] Android: Basic sensors don't require runtime permission",
+    );
+    return true;
+  }
+
+  /// Request sensor permissions - for sensors_plus, this is typically not needed
+  static Future<bool> requestSensorPermission() async {
+    debugPrint("📋 [PERMISSION] Sensor permission not required for acc/gyro");
+    return true;
+  }
+
+  /// For Android 10+ ACTIVITY_RECOGNITION permission (optional, for activity detection)
+  static Future<bool> hasActivityRecognitionPermission() async {
+    if (Platform.isIOS) return true;
+
+    final status = await Permission.activityRecognition.status;
+    debugPrint("📋 [PERMISSION] Activity recognition status: $status");
     return status.isGranted || status.isLimited;
   }
 
-  /// Request sensor permissions
-  static Future<bool> requestSensorPermission() async {
-    debugPrint("📋 [PERMISSION] Requesting sensor permission...");
+  /// Request activity recognition permission
+  static Future<bool> requestActivityRecognitionPermission() async {
+    if (Platform.isIOS) return true;
 
-    final status = await Permission.sensors.request();
-    debugPrint("📋 [PERMISSION] Request result: $status");
-
-    if (status.isPermanentlyDenied) {
-      debugPrint("📋 [PERMISSION] Permanently denied - need to open settings");
-      return false;
-    }
-
+    debugPrint("📋 [PERMISSION] Requesting activity recognition permission...");
+    final status = await Permission.activityRecognition.request();
+    debugPrint("📋 [PERMISSION] Activity recognition result: $status");
     return status.isGranted || status.isLimited;
   }
 
@@ -33,30 +55,12 @@ class PermissionService {
 
   /// Get permission status info for display
   static Future<PermissionInfo> getPermissionInfo() async {
-    final status = await Permission.sensors.status;
-
-    return PermissionInfo(
-      isGranted: status.isGranted || status.isLimited,
-      isPermanentlyDenied: status.isPermanentlyDenied,
-      statusText: _getStatusText(status),
+    // For basic sensors, always granted
+    return const PermissionInfo(
+      isGranted: true,
+      isPermanentlyDenied: false,
+      statusText: 'Granted',
     );
-  }
-
-  static String _getStatusText(PermissionStatus status) {
-    switch (status) {
-      case PermissionStatus.granted:
-        return 'Granted';
-      case PermissionStatus.denied:
-        return 'Denied';
-      case PermissionStatus.restricted:
-        return 'Restricted';
-      case PermissionStatus.limited:
-        return 'Limited';
-      case PermissionStatus.permanentlyDenied:
-        return 'Permanently Denied';
-      case PermissionStatus.provisional:
-        return 'Provisional';
-    }
   }
 }
 

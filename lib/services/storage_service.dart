@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/detection_session.dart';
+import '../models/detection_settings.dart';
 
 /// Service for managing session storage with Hive
 class StorageService {
@@ -45,26 +46,34 @@ class StorageService {
     return sessions;
   }
 
-  /// Create a new session
+  /// Create a new session with full settings
   static Future<DetectionSession> createSession({
-    required double fallThreshold,
+    required DetectionSettings settings,
   }) async {
     final session = DetectionSession(
       startTime: DateTime.now(),
-      fallThreshold: fallThreshold,
+      fallThreshold: settings.fallThreshold,
+      confirmationThreshold: settings.confirmationThreshold,
+      confirmationFrames: settings.confirmationFrames,
+      cooldownSeconds: settings.cooldownSeconds,
+      inferenceSkipFrames: settings.inferenceSkipFrames,
+      enableImpactGate: settings.enableImpactGate,
+      impactThreshold: settings.impactThreshold,
     );
 
-    // Add start event
+    // Add start event with full settings details
     session.events.add(
       SessionEvent(
         timestamp: DateTime.now(),
         type: SessionEventType.sessionStart,
-        details: 'Threshold: ${(fallThreshold * 100).toInt()}%',
+        details: 'Settings: ${settings.summary}',
       ),
     );
 
     await sessionsBox.add(session);
-    debugPrint("💾 [STORAGE] Created session at ${session.startTime}");
+    debugPrint(
+      "💾 [STORAGE] Created session with settings: ${settings.summary}",
+    );
     return session;
   }
 

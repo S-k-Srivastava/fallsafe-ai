@@ -26,13 +26,19 @@ class DetectionSessionAdapter extends TypeAdapter<DetectionSession> {
       maxFallProbability: fields[6] as double?,
       lastActivity: fields[7] as String?,
       events: (fields[8] as List?)?.cast<SessionEvent>(),
+      confirmationThreshold: fields[9] as double,
+      confirmationFrames: fields[10] as int,
+      cooldownSeconds: fields[11] as int,
+      inferenceSkipFrames: fields[12] as int,
+      enableImpactGate: fields[13] as bool,
+      impactThreshold: fields[14] as double,
     );
   }
 
   @override
   void write(BinaryWriter writer, DetectionSession obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(15)
       ..writeByte(0)
       ..write(obj.startTime)
       ..writeByte(1)
@@ -50,7 +56,19 @@ class DetectionSessionAdapter extends TypeAdapter<DetectionSession> {
       ..writeByte(7)
       ..write(obj.lastActivity)
       ..writeByte(8)
-      ..write(obj.events);
+      ..write(obj.events)
+      ..writeByte(9)
+      ..write(obj.confirmationThreshold)
+      ..writeByte(10)
+      ..write(obj.confirmationFrames)
+      ..writeByte(11)
+      ..write(obj.cooldownSeconds)
+      ..writeByte(12)
+      ..write(obj.inferenceSkipFrames)
+      ..writeByte(13)
+      ..write(obj.enableImpactGate)
+      ..writeByte(14)
+      ..write(obj.impactThreshold);
   }
 
   @override
@@ -127,6 +145,10 @@ class SessionEventTypeAdapter extends TypeAdapter<SessionEventType> {
         return SessionEventType.activityChanged;
       case 4:
         return SessionEventType.bufferFilled;
+      case 5:
+        return SessionEventType.impactDetected;
+      case 6:
+        return SessionEventType.cooldownActive;
       default:
         return SessionEventType.sessionStart;
     }
@@ -149,6 +171,12 @@ class SessionEventTypeAdapter extends TypeAdapter<SessionEventType> {
         break;
       case SessionEventType.bufferFilled:
         writer.writeByte(4);
+        break;
+      case SessionEventType.impactDetected:
+        writer.writeByte(5);
+        break;
+      case SessionEventType.cooldownActive:
+        writer.writeByte(6);
         break;
     }
   }

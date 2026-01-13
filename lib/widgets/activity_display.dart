@@ -124,16 +124,15 @@ class _ActivityBars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Show top 5 activities
+    // Show all 13 activity classes sorted by probability
     final indexed = probabilities.asMap().entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-    final top5 = indexed.take(5).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Top Activities',
+          'All Activities',
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w500,
@@ -141,7 +140,7 @@ class _ActivityBars extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        ...top5.map(
+        ...indexed.map(
           (entry) => Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.xs),
             child: _ActivityBar(index: entry.key, probability: entry.value),

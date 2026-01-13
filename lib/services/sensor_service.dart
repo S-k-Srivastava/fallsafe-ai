@@ -19,6 +19,8 @@ class SensorService {
 
   bool _isRunning = false;
   int _sampleCount = 0;
+  bool _accReceived = false;
+  bool _gyroReceived = false;
 
   /// Stream of sensor data readings
   Stream<SensorData> get sensorStream => _sensorController.stream;
@@ -36,21 +38,63 @@ class SensorService {
     debugPrint("📡 [SENSOR_SERVICE] Starting sensor streams...");
     _isRunning = true;
     _sampleCount = 0;
+    _accReceived = false;
+    _gyroReceived = false;
 
-    _accSubscription = accelerometerEventStream().listen((event) {
-      _latestAccX = event.x;
-      _latestAccY = event.y;
-      _latestAccZ = event.z;
-      _emitSensorData();
-    });
+    // Subscribe to accelerometer
+    try {
+      _accSubscription =
+          accelerometerEventStream(
+            samplingPeriod: SensorInterval.gameInterval,
+          ).listen(
+            (event) {
+              _latestAccX = event.x;
+              _latestAccY = event.y;
+              _latestAccZ = event.z;
+              if (!_accReceived) {
+                _accReceived = true;
+                debugPrint(
+                  "✅ [SENSOR_SERVICE] First accelerometer data received",
+                );
+              }
+              _emitSensorData();
+            },
+            onError: (error) {
+              debugPrint("❌ [SENSOR_SERVICE] Accelerometer error: $error");
+            },
+            cancelOnError: false,
+          );
+      debugPrint("📡 [SENSOR_SERVICE] Accelerometer stream subscribed");
+    } catch (e) {
+      debugPrint("❌ [SENSOR_SERVICE] Failed to subscribe to accelerometer: $e");
+    }
 
-    _gyroSubscription = gyroscopeEventStream().listen((event) {
-      _latestGyroX = event.x;
-      _latestGyroY = event.y;
-      _latestGyroZ = event.z;
-    });
+    // Subscribe to gyroscope
+    try {
+      _gyroSubscription =
+          gyroscopeEventStream(
+            samplingPeriod: SensorInterval.gameInterval,
+          ).listen(
+            (event) {
+              _latestGyroX = event.x;
+              _latestGyroY = event.y;
+              _latestGyroZ = event.z;
+              if (!_gyroReceived) {
+                _gyroReceived = true;
+                debugPrint("✅ [SENSOR_SERVICE] First gyroscope data received");
+              }
+            },
+            onError: (error) {
+              debugPrint("❌ [SENSOR_SERVICE] Gyroscope error: $error");
+            },
+            cancelOnError: false,
+          );
+      debugPrint("📡 [SENSOR_SERVICE] Gyroscope stream subscribed");
+    } catch (e) {
+      debugPrint("❌ [SENSOR_SERVICE] Failed to subscribe to gyroscope: $e");
+    }
 
-    debugPrint("✅ [SENSOR_SERVICE] Sensors started");
+    debugPrint("✅ [SENSOR_SERVICE] Sensor subscriptions initiated");
   }
 
   /// Stop collecting sensor data
@@ -82,7 +126,9 @@ class SensorService {
     _sensorController.add(data);
 
     if (_sampleCount % 100 == 0) {
-      debugPrint("📡 [SENSOR_SERVICE] Sample #$_sampleCount: $data");
+      debugPrint(
+        "📡 [SENSOR_SERVICE] Sample #$_sampleCount: acc(${_latestAccX.toStringAsFixed(2)}, ${_latestAccY.toStringAsFixed(2)}, ${_latestAccZ.toStringAsFixed(2)})",
+      );
     }
   }
 

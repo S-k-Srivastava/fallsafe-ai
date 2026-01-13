@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../controllers/detection_controller.dart';
+import '../models/detection_settings.dart';
 import '../services/permission_service.dart';
 import '../widgets/status_indicator.dart';
 import '../widgets/control_button.dart';
@@ -23,7 +24,6 @@ class _HomeScreenState extends State<HomeScreen> {
   late final DetectionController _controller;
   bool _hasPermission = false;
   bool _permissionChecked = false;
-  bool _showSettings = true; // Show settings by default
 
   @override
   void initState() {
@@ -80,8 +80,29 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_controller.isRunning) {
       _controller.stop();
     } else {
-      _controller.start();
+      _showSettingsDialog();
     }
+  }
+
+  void _showSettingsDialog() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusLg),
+        ),
+      ),
+      builder: (context) => _SettingsDialog(
+        settings: _controller.settings,
+        onSettingsChanged: _controller.updateSettings,
+        onStart: () {
+          Navigator.pop(context);
+          _controller.start();
+        },
+      ),
+    );
   }
 
   void _openHistory() {
@@ -106,14 +127,6 @@ class _HomeScreenState extends State<HomeScreen> {
             color: AppColors.textSecondary,
             onPressed: _openHistory,
             tooltip: 'Session History',
-          ),
-          // Settings toggle
-          IconButton(
-            icon: Icon(
-              _showSettings ? Icons.expand_less : Icons.settings_outlined,
-              color: AppColors.textSecondary,
-            ),
-            onPressed: () => setState(() => _showSettings = !_showSettings),
           ),
           if (_controller.isRunning)
             Container(
@@ -219,17 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Settings panel (collapsible)
-          if (_showSettings) ...[
-            SettingsPanel(
-              settings: _controller.settings,
-              onSettingsChanged: _controller.updateSettings,
-              isRunning: _controller.isRunning,
-            ),
-            const SizedBox(height: AppSpacing.md),
-          ],
-
-          // Status indicator
+          // Status indicator at top
           StatusIndicator(
             isFallDetected: _controller.isFallDetected,
             fallProbability: _controller.latestResult?.fallProbability ?? 0,
@@ -435,6 +438,129 @@ class _ValueRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Settings dialog shown before starting detection
+class _SettingsDialog extends StatefulWidget {
+  final DetectionSettings settings;
+  final ValueChanged<DetectionSettings> onSettingsChanged;
+  final VoidCallback onStart;
+
+  const _SettingsDialog({
+    required this.settings,
+    required this.onSettingsChanged,
+    required this.onStart,
+  });
+
+  @override
+  State<_SettingsDialog> createState() => _SettingsDialogState();
+}
+
+class _SettingsDialogState extends State<_SettingsDialog> {
+  late DetectionSettings _settings;
+
+  @override
+  void initState() {
+    super.initState();
+    _settings = widget.settings;
+  }
+
+  void _updateSettings(DetectionSettings newSettings) {
+    setState(() => _settings = newSettings);
+    widget.onSettingsChanged(newSettings);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (context, scrollController) {
+        return Column(
+          children: [
+            // Handle
+            Container(
+              margin: const EdgeInsets.only(top: AppSpacing.sm),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.textMuted,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            // Header
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Detection Settings',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1, color: AppColors.surfaceBorder),
+            // Settings content
+            Expanded(
+              child: SingleChildScrollView(
+                controller: scrollController,
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: SettingsPanel(
+                  settings: _settings,
+                  onSettingsChanged: _updateSettings,
+                  isRunning: false,
+                ),
+              ),
+            ),
+            // Start button
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: widget.onStart,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.safe,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.play_arrow_rounded, size: 24),
+                      SizedBox(width: AppSpacing.sm),
+                      Text(
+                        'Start Detection',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
