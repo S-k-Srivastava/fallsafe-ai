@@ -53,52 +53,61 @@ class SensorService {
     _gyroReceived = false;
     _orientationComputed = false;
 
-    // Subscribe to accelerometer (use default sampling rate ~20Hz)
+    // Subscribe to accelerometer with higher sampling rate (~50Hz)
+    const sensorInterval = Duration(milliseconds: 20);
     try {
-      _accSubscription = accelerometerEventStream().listen(
-        (event) {
-          _latestAccX = event.x;
-          _latestAccY = event.y;
-          _latestAccZ = event.z;
+      _accSubscription =
+          accelerometerEventStream(samplingPeriod: sensorInterval).listen(
+            (event) {
+              _latestAccX = event.x;
+              _latestAccY = event.y;
+              _latestAccZ = event.z;
 
-          // Compute orientation from accelerometer (fallback method)
-          // This gives us pitch and roll, yaw will be 0
-          _computeOrientationFromAccelerometer();
+              // Compute orientation from accelerometer (fallback method)
+              // This gives us pitch and roll, yaw will be 0
+              _computeOrientationFromAccelerometer();
 
-          if (!_accReceived) {
-            _accReceived = true;
-            debugPrint("✅ [SENSOR_SERVICE] First accelerometer data received");
-          }
-          _emitSensorData();
-        },
-        onError: (error) {
-          debugPrint("❌ [SENSOR_SERVICE] Accelerometer error: $error");
-        },
-        cancelOnError: false,
+              if (!_accReceived) {
+                _accReceived = true;
+                debugPrint(
+                  "✅ [SENSOR_SERVICE] First accelerometer data received",
+                );
+              }
+              _emitSensorData();
+            },
+            onError: (error) {
+              debugPrint("❌ [SENSOR_SERVICE] Accelerometer error: $error");
+            },
+            cancelOnError: false,
+          );
+      debugPrint(
+        "📡 [SENSOR_SERVICE] Accelerometer stream subscribed @ ${1000 ~/ sensorInterval.inMilliseconds}Hz",
       );
-      debugPrint("📡 [SENSOR_SERVICE] Accelerometer stream subscribed");
     } catch (e) {
       debugPrint("❌ [SENSOR_SERVICE] Failed to subscribe to accelerometer: $e");
     }
 
-    // Subscribe to gyroscope (use default sampling rate)
+    // Subscribe to gyroscope with higher sampling rate (~50Hz)
     try {
-      _gyroSubscription = gyroscopeEventStream().listen(
-        (event) {
-          _latestGyroX = event.x;
-          _latestGyroY = event.y;
-          _latestGyroZ = event.z;
-          if (!_gyroReceived) {
-            _gyroReceived = true;
-            debugPrint("✅ [SENSOR_SERVICE] First gyroscope data received");
-          }
-        },
-        onError: (error) {
-          debugPrint("❌ [SENSOR_SERVICE] Gyroscope error: $error");
-        },
-        cancelOnError: false,
+      _gyroSubscription = gyroscopeEventStream(samplingPeriod: sensorInterval)
+          .listen(
+            (event) {
+              _latestGyroX = event.x;
+              _latestGyroY = event.y;
+              _latestGyroZ = event.z;
+              if (!_gyroReceived) {
+                _gyroReceived = true;
+                debugPrint("✅ [SENSOR_SERVICE] First gyroscope data received");
+              }
+            },
+            onError: (error) {
+              debugPrint("❌ [SENSOR_SERVICE] Gyroscope error: $error");
+            },
+            cancelOnError: false,
+          );
+      debugPrint(
+        "📡 [SENSOR_SERVICE] Gyroscope stream subscribed @ ${1000 ~/ sensorInterval.inMilliseconds}Hz",
       );
-      debugPrint("📡 [SENSOR_SERVICE] Gyroscope stream subscribed");
     } catch (e) {
       debugPrint("❌ [SENSOR_SERVICE] Failed to subscribe to gyroscope: $e");
     }

@@ -112,6 +112,17 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Returns true if we should show the activity name
+  /// Hides fall-related activity names until fall is confirmed
+  bool _shouldShowActivity() {
+    final result = _controller.latestResult;
+    if (result == null) return false;
+    // If fall is confirmed, show the activity
+    if (_controller.isFallConfirmed) return true;
+    // Otherwise, hide fall-related activities
+    return !result.isActivityFall;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -249,13 +260,19 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Status indicator at top with activity
+          // Only show fall-related activity names when confirmed
           StatusIndicator(
             isFallDetected: _controller.isFallConfirmed,
             fallProbability: _controller.latestResult?.fallProbability ?? 0,
             isRunning: _controller.isRunning,
             isInitialized: _controller.isInitialized,
-            activityName: _controller.latestResult?.activityName,
-            activityEmoji: _controller.latestResult?.activityEmoji,
+            // Hide fall activity names until confirmed
+            activityName: _shouldShowActivity()
+                ? _controller.latestResult?.activityName
+                : null,
+            activityEmoji: _shouldShowActivity()
+                ? _controller.latestResult?.activityEmoji
+                : null,
             maxMagnitude: _controller.isRunning
                 ? _controller.lastAccMagnitude
                 : null,
